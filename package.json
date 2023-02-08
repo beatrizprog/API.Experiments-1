@@ -1,0 +1,32 @@
+{
+  "name": "api.experiments",
+  "version": "1.0.0",
+  "description": "Primeiros experimentos no desenvolvimento de APIs usand Node.js e MySQL.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Luferat/API.Experiments.git"
+  },
+  "keywords": [
+    "API",
+    "REST",
+    "JSON",
+    "Node.js",
+    "MySQL",
+    "CRUD",
+    "API",
+    "HTTP"
+  ],
+  "author": "André Luferat",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Luferat/API.Experiments/issues"
+  },
+  "homepage": "https://github.com/Luferat/API.Experiments#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
