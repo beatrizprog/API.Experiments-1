@@ -13,7 +13,8 @@ const thing = {
     res.json({ "req": req.method, "status": "ok" });
   },
   getOne: async (req, res) => {
-    res.json({ "req": req.method, "id": req.p , "status": "ok" });
+    const id = req.params.id;
+    res.json({ "req": req.method, "id": id, "status": "ok" });
   },
   post: async (req, res) => {
     res.json({ "req": req.method, "status": "ok" });
