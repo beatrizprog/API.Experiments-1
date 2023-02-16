@@ -9,22 +9,48 @@ const port = conf.HTTPPORT;
 
 // Objeto que será executado quando houver uma requisição.
 const thing = {
+
   getAll: async (req, res) => {
-    res.json({ "req": req.method, "status": "ok" });
+    res.json({
+      "req": req.method,
+      "status": "ok"
+    });
   },
+
   getOne: async (req, res) => {
     const id = req.params.id;
-    res.json({ "req": req.method, "id": id, "status": "ok" });
+    res.json({
+      "req": req.method,
+      "id": req.params.id,
+      "status": "ok"
+    });
   },
+
   post: async (req, res) => {
-    res.json({ "req": req.method, "status": "ok" });
-   },
-  put: async (req, res) => { 
-    res.json({ "req": req.method, "status": "ok" });
+    res.json({
+      "req": req.method,
+      "data": req.body,
+      "status": "ok"
+    });
   },
+
+  put: async (req, res) => {
+    res.json({
+      "req": req.method,
+      "id": req.params.id,
+      "data": req.body,
+      "status": "ok"
+    });
+
+  },
+
   delete: async (req, res) => {
-    res.json({ "req": req.method, "status": "ok" });
-   }
+    res.json({
+      "req": req.method,
+      "id": req.params.id,
+      "status": "ok"
+    });
+  }
 }
 
 // Objeto que trata requisições para o 'user'.
