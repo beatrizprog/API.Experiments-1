@@ -33,7 +33,7 @@ const thingControl = {
     try {
 
       const { id } = req.params;
-      const [rows] = await conn.query("SELECT * FROM things WHERE tid = ?", [id]);
+      const [rows] = await conn.query("SELECT * FROM things WHERE tstatus = 'on' AND tid = ?", [id]);
       res.json({ data: rows });
 
     } catch (error) {
