@@ -66,6 +66,9 @@ const userControl = {
         try {
 
             const { name, email, password, avatar, birth } = req.body;
+
+            // Validação e sanitização dos dados acima antes de "entrgar" ao banco de dados...
+
             const sql = "INSERT INTO users (uname, uemail, upassword, uavatar, ubirth) VALUES (?, ?, SHA1(?), ?, ?)";
             const [rows] = await conn.query(sql, [name, email, password, avatar, birth]);
             res.json({ data: rows });
@@ -82,6 +85,9 @@ const userControl = {
         try {
 
             const { name, email, password, avatar, birth } = req.body;
+
+            // Validação e sanitização dos dados acima antes de "entrgar" ao banco de dados...
+
             const { id } = req.params;
             const sql = "UPDATE users SET uname = ?, uemail = ?, upassword = SHA1(?), uavatar = ?, ubirth = ? WHERE uid = ?"
             const [rows] = await conn.query(sql, [name, email, password, avatar, birth, id]);
