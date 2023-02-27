@@ -6,14 +6,8 @@
 // Importa conector do banco de dados.
 const conn = require('../model/mysql');
 
-// Obtém configurações do aplicativo (verifique a atualização de /.env).
-const conf = require('dotenv').config().parsed;
-
-// Importa Validator -> https://github.com/validatorjs/validator.js.
-var validator = require('validator');
-
-// Importa ferramentas do aplicativo -> /control/apptools.js
-var appTools = require('./apptools');
+// importa validador de campos.
+const validate = require('../tools/validationUser')
 
 // Inicializa variáveis.
 user = {}
@@ -35,22 +29,39 @@ const userControl = {
     // Lista um registro único pelo Id.
     getOne: async (req, res) => {
         try {
+
+            // Extrai o Id do usuário, da rota.
             const { id } = req.params;
-            const [rows] = await conn.query("SELECT * FROM users WHERE uid = ? AND ustatus = 'on'", [id]);
-            res.json({ data: rows });
+
+            // Valida se o Id é um inteiro.
+            if (isNaN(parseInt(id, 10)))
+                res.json({ status: "error", message: "Id inválido!" });
+            else {
+                const { id } = req.params;
+                const [rows] = await conn.query("SELECT * FROM users WHERE uid = ? AND ustatus = 'on'", [id]);
+                res.json({ data: rows });
+            }
         } catch (error) {
             res.json({ status: "error", message: error });
         }
 
     },
 
-    // apaga um registro único pelo Id.
+    // Apaga um registro único pelo Id.
     delete: async (req, res) => {
         try {
-            const { id } = req.params
-            const sql = "UPDATE users SET ustatus = 'del' WHERE uid = ?"
-            const [rows] = await conn.query(sql, [id]);
-            res.json({ data: rows });
+
+            // Extrai o Id do usuário, da rota.
+            const { id } = req.params;
+
+            // Valida se o Id é um inteiro.
+            if (isNaN(parseInt(id, 10)))
+                res.json({ status: "error", message: "Id inválido!" });
+            else {
+                const sql = "UPDATE users SET ustatus = 'del' WHERE uid = ?"
+                const [rows] = await conn.query(sql, [id]);
+                res.json({ data: rows });
+            }
         } catch (error) {
             res.json({ status: "error", message: error });
         }
@@ -59,28 +70,8 @@ const userControl = {
     // Insere um novo registro.
     post: async (req, res) => {
 
-        // Remove espaços antes e depois da string e esvazia campos preenchidos só com espaços.
-        for (const key in req.body) user[key] = req.body[key].trim();
-
-        // Valida nome com pelo menos 3 caracteres.
-        if (validator.isEmpty(user.name)) err.push('O nome é obrigatório.')
-        else if (!validator.isLength(user.name, 3)) err.push('O nome está muito curto.')
-
-        // Valida e-mail.
-        if (validator.isEmpty(user.email)) err.push('O e-mail é obrigatório.')
-        else if (!validator.isEmail(user.email)) err.push('O e-mail é inválido.')
-
-        // Valida senha. Regras: { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 }
-        if (validator.isEmpty(user.password)) err.push('A senha é obrigatória.')
-        else if (!validator.isStrongPassword(user.password)) err.push('A senha está muito fraca.')
-
-        // O avatar é opcional e, caso não exista, usa um avatar padrão.
-        if (validator.isEmpty(user.avatar)) user.avatar = conf.DEFAULT_AVATAR
-
-        // Valida data de aniversário e aceita somente maiores de 14 anos.
-        if (validator.isEmpty(user.birth)) err.push('Data de nascimento é obrigatória.')
-        else if (!validator.isDate(user.birth)) err.push('Data de nascimento inválida.')
-        else if (appTools.getAge(user.birth) < 14) err.push('Você deve ter 14 anos ou mais.')
+        // Valida preenchimento dos campos.
+        err = validate(req.body);
 
         // Se ocorreram erros...
         if (err.length > 0) {
@@ -100,41 +91,29 @@ const userControl = {
     // Edita o registro pelo Id.
     put: async (req, res) => {
 
-        // Remove espaços antes e depois da string e esvazia campos preenchidos só com espaços.
-        for (const key in req.body) user[key] = req.body[key].trim();
+        // Extrai o Id do usuário, da rota.
+        const { id } = req.params;
 
-        // Valida nome com pelo menos 3 caracteres.
-        if (validator.isEmpty(user.name)) err.push('O nome é obrigatório.')
-        else if (!validator.isLength(user.name, 3)) err.push('O nome está muito curto.')
+        // Valida se o Id é um inteiro.
+        if (isNaN(parseInt(id, 10)))
+            res.json({ status: "error", message: "Id inválido!" });
+        else {
 
-        // Valida e-mail.
-        if (validator.isEmpty(user.email)) err.push('O e-mail é obrigatório.')
-        else if (!validator.isEmail(user.email)) err.push('O e-mail é inválido.')
+            // Valida preenchimento dos campos.
+            err = validate(req.body);
 
-        // Valida senha. Regras: { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 }
-        if (validator.isEmpty(user.password)) err.push('A senha é obrigatória.')
-        else if (!validator.isStrongPassword(user.password)) err.push('A senha está muito fraca.')
-
-        // O avatar é opcional e, caso não exista, usa um avatar padrão.
-        if (validator.isEmpty(user.avatar)) user.avatar = conf.DEFAULT_AVATAR
-
-        // Valida data de aniversário e aceita somente maiores de 14 anos.
-        if (validator.isEmpty(user.birth)) err.push('Data de nascimento é obrigatória.')
-        else if (!validator.isDate(user.birth)) err.push('Data de nascimento inválida.')
-        else if (appTools.getAge(user.birth) < 14) err.push('Você deve ter 14 anos ou mais.')
-
-        // Se ocorreram erros...
-        if (err.length > 0) {
-            res.json({ status: "error", message: err })
-        } else {
-
-            try {
-                const { id } = req.params;
-                const sql = "UPDATE users SET uname = ?, uemail = ?, upassword = SHA1(?), uavatar = ?, ubirth = ? WHERE uid = ?"
-                const [rows] = await conn.query(sql, [user.name, user.email, user.password, user.avatar, user.birth, id]);
-                res.json({ data: rows });
-            } catch (error) {
-                res.json({ status: "error", message: error });
+            // Se ocorreram erros...
+            if (err.length > 0) {
+                res.json({ status: "error", message: err })
+            } else {
+                try {
+                    const { id } = req.params;
+                    const sql = "UPDATE users SET uname = ?, uemail = ?, upassword = SHA1(?), uavatar = ?, ubirth = ? WHERE uid = ?"
+                    const [rows] = await conn.query(sql, [user.name, user.email, user.password, user.avatar, user.birth, id]);
+                    res.json({ data: rows });
+                } catch (error) {
+                    res.json({ status: "error", message: error });
+                }
             }
         }
     }
