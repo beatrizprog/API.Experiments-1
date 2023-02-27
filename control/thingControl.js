@@ -47,7 +47,7 @@ const thingControl = {
   post: async (req, res) => {
     try {
       const { user, name, photo, description, location, options } = req.body;
-      const sql = "INSERT INTO things (tuser, tname, tphoto, tdescription, tlocation, toptions) VALUES (?, ?, ?, ?, ?, ?)";
+      const sql = "INSERT INTO things (tuser, tname, tphoto, tdescription, tlocation, toptions) VALUES (?, ?)";
       const [rows] = await conn.query(sql, [user, name, photo, description, location, options]);
       res.json({ data: rows });
     } catch (error) {
